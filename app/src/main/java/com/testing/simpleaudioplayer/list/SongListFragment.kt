@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.testing.simpleaudioplayer.R
+import com.testing.simpleaudioplayer.list.recycler.MelodyListAdapter
 import com.testing.simpleaudioplayer.list.viewmodel.SongListViewModel
 import kotlinx.android.synthetic.main.fragment_song_list.*
 
@@ -23,8 +24,11 @@ class SongListFragment : Fragment(R.layout.fragment_song_list) {
 
         (activity as AppCompatActivity).setSupportActionBar(toolbar)
 
-        viewModel.melodyList.observe(viewLifecycleOwner, {
+        val listAdapter = MelodyListAdapter()
+        list.adapter = listAdapter
 
+        viewModel.melodyList.observe(viewLifecycleOwner, {
+            listAdapter.items = it
         })
 
 

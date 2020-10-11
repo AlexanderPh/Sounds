@@ -8,7 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 class MelodyListLiveData(
     val application: Application,
     val viewModelScope: CoroutineScope
-) : LiveData<List<PlayableMelody>>() {
+) : LiveData<ArrayList<PlayableMelody>>() {
 
 
 
