@@ -19,15 +19,15 @@ private const val PROGRESS_VIEW_ID = 1702
 
 class MelodyViewHolder(
     view: View,
-    val coverView: InteractableCoverView,
+    private val coverView: InteractableCoverView,
     private val melodyTitle: MaterialTextView,
     private val progress: ProgressBar
 
 ) : RecyclerView.ViewHolder(view){
 
-    fun bind(melody: PlayableMelody, glide: Glide){
+    fun bind(melody: PlayableMelody){
         melodyTitle.text = melody.name
-        coverView.bind(glide, melody.coverPath)
+        coverView.bind(melody.coverPath)
         progress.progress = melody.progress
     }
 

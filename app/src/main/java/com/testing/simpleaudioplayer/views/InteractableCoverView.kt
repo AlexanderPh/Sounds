@@ -12,8 +12,7 @@ class InteractableCoverView @JvmOverloads constructor(
 
 
 
-    fun bind(glide: Glide, coverPath: String?) {
-        TODO("Not yet implemented")
+    fun bind( coverPath: String?) {
     }
 
 
