@@ -4,6 +4,6 @@ data class Melody (
     val id: Int,
     val name: String,
     val path: String?,
-    val previewPath: String?,
-    val coverPath: String?
+    val audio: String?,
+    val image: String?
 )

@@ -33,8 +33,8 @@ class MelodyInteractor(
                 PlayableMelody(
                     id = melody.id,
                     name = melody.name,
-                    previewPath = melody.previewPath,
-                    coverPath = melody.coverPath
+                    previewPath = melody.audio,
+                    coverPath = melody.image
                 )
             )
         }

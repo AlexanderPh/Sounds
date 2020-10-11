@@ -1,6 +1,8 @@
 package com.testing.simpleaudioplayer.list.recycler
 
 import android.content.Context
+import android.text.TextUtils
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
@@ -8,7 +10,7 @@ import android.widget.RelativeLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.textview.MaterialTextView
-import com.testing.core.getDimension
+import com.testing.core.*
 import com.testing.simpleaudioplayer.R
 import com.testing.simpleaudioplayer.model.PlayableMelody
 import com.testing.simpleaudioplayer.views.InteractableCoverView
@@ -50,6 +52,10 @@ class MelodyViewHolder(
 
             val verticalMargin = context.getDimension(
                 R.dimen.list_item_vertical_margin
+            ).toInt()
+
+            val verticalMarginSmall = context.getDimension(
+                R.dimen.list_item_vertical_margin_small
             ).toInt()
 
             val rootLayout = RelativeLayout(context).apply {
@@ -95,6 +101,16 @@ class MelodyViewHolder(
                     )
                 }
 
+                setTextSize(
+                    TypedValue.COMPLEX_UNIT_PX,
+                    context.getDimension(R.dimen.list_item_text_size)
+                )
+
+                setTextColor(context.color(R.color.colorWhite))
+                typeface = context.getFontCompat(R.font.roboto_regular)
+                maxLines = 1
+                setLines(1)
+                ellipsize = TextUtils.TruncateAt.END
             }
 
             val progress = ProgressBar(
@@ -103,17 +119,26 @@ class MelodyViewHolder(
                 android.R.attr.progressBarStyleHorizontal
             ).apply {
                 id = PROGRESS_VIEW_ID
+                val progressHeight = context.getDimension(R.dimen.progress_bar_height).toInt()
+
                 layoutParams = RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
-                    RelativeLayout.LayoutParams.WRAP_CONTENT
+                    progressHeight
                 ).apply {
                     addRule(RelativeLayout.END_OF, COVER_VIEW_ID)
-                    addRule(RelativeLayout.ABOVE, TITLE_VIEW_ID)
+                    addRule(RelativeLayout.BELOW, TITLE_VIEW_ID)
                     addRule(RelativeLayout.ALIGN_PARENT_END)
+                    setMargins(
+                        0,
+                        verticalMargin,
+                        horizontalMargin,
+                        verticalMargin
+                    )
                 }
 
                 max = 100
                 progress = 30
+                progressDrawable = context.getDrawableCompat(R.drawable.list_item_progress_drawable)
             }
 
 
@@ -121,7 +146,9 @@ class MelodyViewHolder(
             rootLayout.addView(melodyTitle)
             rootLayout.addView(progress)
 
-
+            rootLayout.onClick {
+                coverView.setState(InteractableCoverView.State.Loading)
+            }
 
             return MelodyViewHolder(rootLayout, coverView, melodyTitle, progress)
         }
