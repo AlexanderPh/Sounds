@@ -45,12 +45,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:background="@color/colorPrimaryDark"
+
         >
         <com.testing.simpleaudioplayer.views.CurrentPlayView
             android:id="@+id/currentPlay"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@color/colorWhite"
+            android:layout_height="wrap_content"
+            android:background="@color/colorSecondaryVariant"
             />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -58,7 +60,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:background="@color/colorPrimaryDark"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             />
     </LinearLayout>
