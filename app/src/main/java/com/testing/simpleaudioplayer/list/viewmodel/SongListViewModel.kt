@@ -2,6 +2,7 @@ package com.testing.simpleaudioplayer.list.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.*
+import com.testing.core.log
 import com.testing.player.PlayerProvider
 import com.testing.player.PlayerProviderCallback
 import com.testing.simpleaudioplayer.list.recycler.PlayerControlCallback
@@ -99,6 +100,20 @@ class SongListViewModel(
                     updateList(it)
                }
           }
+     }
+
+     override fun onProgressUpdated(progress: Int) {
+          log(progress)
+          currentPlay.value?.let { melody ->
+               currentPlay.value = melody.copy(
+                    progress = progress
+               ).also {
+                    updateList(it)
+               }
+          }
+     }
+
+     override fun onBufferingProgressUpdated(progress: Int) {
      }
 
      override fun onError() {

@@ -26,10 +26,7 @@ class MelodyListDiffUtil(
         val oldItem = oldItems[oldItemPosition]
         val newItem = newItems[newItemPosition]
 
-
-        return  oldItem.id == newItem.id
-                && oldItem.state == newItem.state
-                && oldItem.progress == newItem.progress
+        return oldItem.state == newItem.state || oldItem.progress == newItem.progress
     }
 
     override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {

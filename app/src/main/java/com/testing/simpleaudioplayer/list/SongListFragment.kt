@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.testing.core.setDivider
 import com.testing.simpleaudioplayer.R
+import com.testing.simpleaudioplayer.list.recycler.ItemAnimator
 import com.testing.simpleaudioplayer.list.recycler.MelodyListAdapter
 import com.testing.simpleaudioplayer.list.viewmodel.SongListViewModel
 import com.testing.simpleaudioplayer.list.viewmodel.SongListViewModel.Action.LoadList
@@ -30,6 +31,7 @@ class SongListFragment : Fragment(R.layout.fragment_song_list) {
         val listAdapter = MelodyListAdapter()
         listAdapter.controlCallback = viewModel
         list.adapter = listAdapter
+        list.itemAnimator = ItemAnimator()
         list.setDivider(R.drawable.melody_list_item_divider)
 
         viewModel.melodyList.observe(viewLifecycleOwner, {
