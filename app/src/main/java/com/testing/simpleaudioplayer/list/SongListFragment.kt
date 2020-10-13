@@ -26,12 +26,24 @@ class SongListFragment : Fragment(R.layout.fragment_song_list) {
 
         (activity as AppCompatActivity).setSupportActionBar(toolbar)
 
+
         val listAdapter = MelodyListAdapter()
+        listAdapter.controlCallback = viewModel
         list.adapter = listAdapter
         list.setDivider(R.drawable.melody_list_item_divider)
 
         viewModel.melodyList.observe(viewLifecycleOwner, {
             listAdapter.items = it
+        })
+
+        viewModel.currentPlay.observe(viewLifecycleOwner,{
+            it?.let {
+                currentPlay.bind(it)
+            }
+        })
+
+        viewModel.currentPlayIndex.observe(viewLifecycleOwner,{
+            listAdapter.currentIndex = it
         })
         viewModel.onAction(LoadList(R.raw.test_list))
 

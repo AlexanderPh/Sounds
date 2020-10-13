@@ -8,29 +8,37 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.google.android.material.textview.MaterialTextView
 import com.testing.core.*
 import com.testing.simpleaudioplayer.R
 import com.testing.simpleaudioplayer.model.PlayableMelody
 import com.testing.simpleaudioplayer.views.InteractableCoverView
+import com.testing.simpleaudioplayer.views.PlayingState
 
 private const val COVER_VIEW_ID = 1700
 private const val TITLE_VIEW_ID = 1701
 private const val PROGRESS_VIEW_ID = 1702
 
 class MelodyViewHolder(
-    view: View,
+    private val view: View,
     private val coverView: InteractableCoverView,
     private val melodyTitle: MaterialTextView,
     private val progress: ProgressBar
 
 ) : RecyclerView.ViewHolder(view){
 
-    fun bind(melody: PlayableMelody){
+    fun bind(melody: PlayableMelody, callback: PlayerControlCallback?){
         melodyTitle.text = melody.name
         coverView.bind(melody.coverPath)
+        coverView.playingState = melody.state
         progress.progress = melody.progress
+        view.onClick {
+            when(coverView.playingState){
+                PlayingState.OnPause -> callback?.play(this.adapterPosition)
+                PlayingState.Playing -> callback?.pause(this.adapterPosition)
+                else -> return@onClick
+            }
+        }
     }
 
 
@@ -145,11 +153,6 @@ class MelodyViewHolder(
             rootLayout.addView(coverView)
             rootLayout.addView(melodyTitle)
             rootLayout.addView(progress)
-
-            rootLayout.onClick {
-                coverView.setState(InteractableCoverView.State.Loading)
-            }
-
             return MelodyViewHolder(rootLayout, coverView, melodyTitle, progress)
         }
     }

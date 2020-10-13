@@ -7,14 +7,13 @@ import com.testing.repository.model.Result
 import com.testing.simpleaudioplayer.model.PlayableMelody
 
 class MelodyInteractor(
-    private val application: Application
+    application: Application
 ){
     private val repository = SoundRepository(application)
 
 
     suspend fun loadList(rawResId: Int) : ArrayList<PlayableMelody>? {
-        val result  = repository.loadFromRaw(rawResId)
-        return when (result) {
+        return when (val result  = repository.loadFromRaw(rawResId)) {
             is Result.Success -> {
                 generatePlayable(result.melodyList)
             }

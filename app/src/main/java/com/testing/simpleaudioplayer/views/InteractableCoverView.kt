@@ -16,6 +16,19 @@ class InteractableCoverView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
+    var playingState: PlayingState = PlayingState.OnPause
+        set(value) {
+            field = value
+            updateState()
+        }
+
+    private fun updateState() {
+        when (playingState){
+            PlayingState.Loading -> setLoading()
+            PlayingState.OnPause -> setOnPause()
+            PlayingState.Playing -> setPlaying()
+        }
+    }
 
     private val glide = Glide.with(context)
     private val cornerRadius = context
@@ -55,27 +68,23 @@ class InteractableCoverView @JvmOverloads constructor(
         addView(background)
         addView(icon)
         addView(progressBar)
-        setState(State.OnPause)
+        playingState =PlayingState.OnPause
     }
 
     fun bind( coverPath: String?) {
         glide.load(coverPath).transform(RoundedCorners(cornerRadius)).into(background)
     }
 
-    fun setState(state: State){
-        when (state){
-            State.Loading -> setLoading()
-            State.OnPause -> setOnPause()
-            State.Playing -> setPlaying()
-        }
-    }
+
 
     private fun setPlaying() {
+        icon.visibility = VISIBLE
         icon.setImageDrawable(pauseDrawable)
         progressBar.visibility = GONE
     }
 
     private fun setOnPause() {
+        icon.visibility = VISIBLE
         icon.setImageDrawable(playDrawable)
         progressBar.visibility = GONE
     }
@@ -86,9 +95,5 @@ class InteractableCoverView @JvmOverloads constructor(
     }
 
 
-    enum class State{
-        Loading,
-        Playing,
-        OnPause
-    }
+
 }

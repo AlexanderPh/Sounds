@@ -13,6 +13,7 @@ import com.testing.core.getDimension
 import com.testing.core.getDrawableCompat
 import com.testing.core.getFontCompat
 import com.testing.simpleaudioplayer.R
+import com.testing.simpleaudioplayer.model.PlayableMelody
 
 
 private const val COVER_VIEW_ID = 929
@@ -25,7 +26,14 @@ class CurrentPlayView @JvmOverloads constructor(
 ) : RelativeLayout(context, attrs, defStyleAttr) {
 
 
-    val titleText = context.getString(R.string.now_playing_title)
+    fun bind(melody: PlayableMelody) {
+        melodyTitle.text = "$titleText ${melody.name}"
+        coverView.playingState = melody.state
+        progress.progress = melody.progress
+    }
+
+
+    private val titleText = context.getString(R.string.now_playing_title)
 
     private val horizontalMargin = context.getDimension(
         R.dimen.list_item_horizontal_margin

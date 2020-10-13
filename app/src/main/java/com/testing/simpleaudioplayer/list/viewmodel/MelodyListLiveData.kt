@@ -2,6 +2,7 @@ package com.testing.simpleaudioplayer.list.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.testing.simpleaudioplayer.model.PlayableMelody
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -11,7 +12,7 @@ class MelodyListLiveData(
     private val application: Application,
     private val scope: CoroutineScope,
     private val rawResId: Int
-) : LiveData<ArrayList<PlayableMelody>>() {
+) : MutableLiveData<ArrayList<PlayableMelody>>() {
 
     private val interactor = MelodyInteractor.getInstance(application)
     private var job: Job? = null
@@ -30,5 +31,4 @@ class MelodyListLiveData(
     override fun onInactive() {
         job?.cancel()
     }
-
 }
