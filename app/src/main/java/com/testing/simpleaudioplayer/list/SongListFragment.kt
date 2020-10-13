@@ -33,7 +33,7 @@ class SongListFragment : Fragment(R.layout.fragment_song_list) {
         list.setDivider(R.drawable.melody_list_item_divider)
 
         viewModel.melodyList.observe(viewLifecycleOwner, {
-            listAdapter.items = it
+            listAdapter.setNewItems(it)
         })
 
         viewModel.currentPlay.observe(viewLifecycleOwner,{

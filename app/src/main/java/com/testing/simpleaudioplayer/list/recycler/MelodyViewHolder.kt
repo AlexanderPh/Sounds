@@ -27,6 +27,14 @@ class MelodyViewHolder(
 
 ) : RecyclerView.ViewHolder(view){
 
+    fun setProgress(progressValue: Int){
+        progress.progress = progressValue
+    }
+
+    fun setState(state: PlayingState){
+        coverView.playingState = state
+    }
+
     fun bind(melody: PlayableMelody, callback: PlayerControlCallback?){
         melodyTitle.text = melody.name
         coverView.bind(melody.coverPath)
