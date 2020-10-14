@@ -37,7 +37,7 @@ class TrackListAdapter : RecyclerView.Adapter<TrackViewHolder>() {
     }
 
 
-
+    //переопределение перегруженного метода позволит контролировать конкретные изменения в полях вью
     override fun onBindViewHolder(
         holder: TrackViewHolder,
         position: Int,
@@ -56,7 +56,6 @@ class TrackListAdapter : RecyclerView.Adapter<TrackViewHolder>() {
                     val state = bundle.getSerializable(TrackListDiffUtil.STATE_KEY) as PlayingState
                     holder.setState(state)
                 }
-
                 log(payload)
             }
         }

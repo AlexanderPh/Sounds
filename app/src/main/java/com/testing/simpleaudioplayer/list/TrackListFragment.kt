@@ -28,9 +28,9 @@ class TrackListFragment : Fragment(R.layout.fragment_song_list) {
 
 
         val listAdapter = TrackListAdapter()
-        listAdapter.controlCallback = viewModel
+        listAdapter.controlCallback = viewModel // клики айтемов пробрасываем сразу в модель
         list.adapter = listAdapter
-        list.itemAnimator = ItemAnimator()
+        list.itemAnimator = ItemAnimator() // кастомный аниматор, чтобы отключить анимации айтемов при апдейте
         list.setDivider(R.drawable.track_list_item_divider)
         currentPlay.setUpBlurView(list)
 

@@ -1,6 +1,7 @@
 package com.testing.simpleaudioplayer.list.recycler
 
 import android.content.Context
+import android.graphics.Color
 import android.text.TextUtils
 import android.util.TypedValue
 import android.view.View
@@ -37,11 +38,13 @@ class TrackViewHolder(
 
     fun bind(track: PlayableTrack, callback: PlayerControlCallback?){
         trackTitle.text = track.name
-        coverView.bind(track.coverPath)
+        coverView.bind(track.coverPath, track.assetPath)
         coverView.playingState = track.state
         progress.progress = track.progress
         view.onClick {
-            callback?.itemClicked(this.adapterPosition)
+            if (!coverView.stateIsLocked){
+                callback?.itemClicked(this.adapterPosition)
+            }
         }
     }
 
@@ -69,12 +72,14 @@ class TrackViewHolder(
             val verticalMarginSmall = context.getDimension(
                 R.dimen.list_item_vertical_margin_small
             ).toInt()
+            val backColor = context.color(R.color.colorPrimaryDark)
 
             val rootLayout = RelativeLayout(context).apply {
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
+                setBackgroundColor(backColor)
             }
 
             val coverView = InteractableCoverView(context).apply {
@@ -93,7 +98,6 @@ class TrackViewHolder(
                         verticalMargin
                     )
                 }
-
             }
 
             val trackTitle = MaterialTextView(context).apply {
@@ -154,9 +158,17 @@ class TrackViewHolder(
             }
 
 
+            rootLayout.background = createRippleDrawable(
+                rootLayout.background,
+                Color.LTGRAY
+            ).apply {
+                alpha = 40
+            }
+
             rootLayout.addView(coverView)
             rootLayout.addView(trackTitle)
             rootLayout.addView(progress)
+
             return TrackViewHolder(rootLayout, coverView, trackTitle, progress)
         }
     }

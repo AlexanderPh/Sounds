@@ -31,7 +31,8 @@ class TrackInteractor(
                     id = track.id,
                     name = track.name,
                     previewPath = track.audio,
-                    coverPath = track.image
+                    coverPath = track.image,
+                    assetPath = track.path
                 )
             )
         }
