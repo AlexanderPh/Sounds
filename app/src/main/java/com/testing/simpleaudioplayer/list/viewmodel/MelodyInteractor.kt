@@ -21,8 +21,6 @@ class MelodyInteractor(
                 null
             }
         }
-
-
     }
 
     private fun generatePlayable(melodyList: List<Melody>): ArrayList<PlayableMelody> {

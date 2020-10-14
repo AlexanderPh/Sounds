@@ -8,11 +8,9 @@ import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import androidx.appcompat.widget.AppCompatImageView
 import com.google.android.material.textview.MaterialTextView
-import com.testing.core.color
-import com.testing.core.getDimension
-import com.testing.core.getDrawableCompat
-import com.testing.core.getFontCompat
+import com.testing.core.*
 import com.testing.simpleaudioplayer.R
+import com.testing.simpleaudioplayer.list.recycler.PlayerControlCallback
 import com.testing.simpleaudioplayer.model.PlayableMelody
 
 
@@ -25,6 +23,7 @@ class CurrentPlayView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : RelativeLayout(context, attrs, defStyleAttr) {
 
+    var controlCallback : PlayerControlCallback? = null
 
     fun bind(melody: PlayableMelody) {
         melodyTitle.text = "$titleText ${melody.name}"
@@ -146,6 +145,18 @@ class CurrentPlayView @JvmOverloads constructor(
         addView(closeView)
         addView(melodyTitle)
         addView(progress)
+
+        closeView.onClick {
+            controlCallback?.stop()
+        }
+
+        coverView.onClick {
+            when(coverView.playingState){
+                PlayingState.OnPause -> controlCallback?.play()
+                PlayingState.Playing -> controlCallback?.pause()
+                else -> return@onClick
+            }
+        }
     }
 
 }

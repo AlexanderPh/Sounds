@@ -1,18 +1,18 @@
 package com.testing.simpleaudioplayer.list.viewmodel
 
 import android.app.Application
+import android.widget.Toast
 import androidx.lifecycle.*
-import com.testing.core.log
 import com.testing.player.PlayerProvider
 import com.testing.player.PlayerProviderCallback
 import com.testing.simpleaudioplayer.list.recycler.PlayerControlCallback
-import com.testing.simpleaudioplayer.list.viewmodel.SongListViewModel.Action.*
 import com.testing.simpleaudioplayer.model.PlayableMelody
 import com.testing.simpleaudioplayer.views.PlayingState
 import kotlinx.coroutines.launch
 
+const val INIT_POSITION = -1
 class SongListViewModel(
-     application: Application
+      application: Application
 ) : AndroidViewModel(application), PlayerProviderCallback, PlayerControlCallback {
 
      private val interactor = MelodyInteractor.getInstance(application)
@@ -20,104 +20,101 @@ class SongListViewModel(
 
 
      val currentPlay = MutableLiveData<PlayableMelody?>(null)
-     val currentPlayIndex = MutableLiveData<Int>(-1)
-
-
-     val progress : LiveData<Int> = Transformations.map(currentPlay){
-          it?.progress
-     }
-     val state: LiveData<PlayingState> = Transformations.map(currentPlay){
-          it?.state
-     }
-
-     val melodyList = MutableLiveData<ArrayList<PlayableMelody>>(ArrayList())
+     private val currentPlayIndex = MutableLiveData(INIT_POSITION)
+     val melodyList = MutableLiveData<MutableList<PlayableMelody>>(mutableListOf())
 
 
 
-     fun onAction(action: Action) {
-          when (action){
-               is LoadList -> loadList(action.resId)
-               is SelectMelody -> selectMelody(action.melody)
-          }
-     }
-
-     private fun loadList(resId: Int) = viewModelScope.launch {
+     fun loadList(resId: Int) = viewModelScope.launch {
           val list = interactor.loadList(resId)
           list?.let {
                melodyList.postValue(it)
           }
      }
 
-     private fun selectMelody(melody: PlayableMelody) {
-          currentPlay.postValue(melody)
-          player.playSoundFromUrl(melody.previewPath)
-     }
 
 
-     sealed class Action{
-          class LoadList(val resId: Int) : Action()
-          class SelectMelody(val melody: PlayableMelody) : Action()
-     }
 
+     //коллбэк от плеера при начала воспроизведения
      override fun onPlayStarted() {
           currentPlay.value?.let { melody ->
-               currentPlay.value = melody.copy(
+               val updatedMelody = melody.copy(
                     state = PlayingState.Playing
-               ).also {
-                    updateList(it)
-               }
+               )
+               updateList(updatedMelody)
+               currentPlay.setValue(updatedMelody)
           }
 
      }
 
+     //коллбэк от плеера при паузе воспроизведения
+     override fun onPlayerPaused() {
+          currentPlay.value?.let { melody ->
+               val updatedMelody = melody.copy(
+                    state = PlayingState.OnPause
+               )
+               updateList(updatedMelody)
+               currentPlay.setValue(updatedMelody)
+          }
+     }
+
+
+     //коллбэк от плеера при окончании воспроизведения
      override fun onPlayStopped() {
           currentPlay.value?.let { melody ->
-               currentPlay.postValue( melody.copy(
-                    state = PlayingState.OnPause
-               ).also {
-                    updateList(it)
-               }
+               val updatedMelody = melody.copy(
+                    state = PlayingState.Playing
                )
+               updateList(updatedMelody)
+               currentPlay.setValue(null)
           }
+     }
+
+
+     //коллбэк от плеера о начале буферизации
+     override fun onDataSourcePrepareStarted() {
+          currentPlay.value?.let { melody ->
+               val updatedMelody = melody.copy(
+                    state = PlayingState.Loading
+               )
+               updateList(updatedMelody)
+               currentPlay.setValue(updatedMelody)
+          }
+     }
+
+     //коллбэк от плеера с прогрессом воспроизведения
+     override fun onProgressUpdated(progress: Int) {
+          currentPlay.value?.let { melody ->
+               val updatedMelody = melody.copy(
+                    progress = progress
+               )
+               updateList(updatedMelody)
+               currentPlay.setValue(updatedMelody)
+          }
+     }
+
+     //коллбэк от плеера с прогрессом буферизации
+
+     override fun onBufferingProgressUpdated(progress: Int) {
+          // на всякий, но не имплементируем
+
      }
 
      private fun updateList(updatedMelody: PlayableMelody) {
           melodyList.value?.let {
                val index = currentPlayIndex.value
                if (index!! != -1){
-                    it[index] = updatedMelody
+                    it[index]= updatedMelody
                }
-
                melodyList.postValue(it)
           }
      }
 
-     override fun onDataSourcePrepareStarted() {
-          currentPlay.value?.let { melody ->
-               currentPlay.value = melody.copy(
-                    state = PlayingState.Loading
-               ).also {
-                    updateList(it)
-               }
-          }
-     }
 
-     override fun onProgressUpdated(progress: Int) {
-          log(progress)
-          currentPlay.value?.let { melody ->
-               currentPlay.value = melody.copy(
-                    progress = progress
-               ).also {
-                    updateList(it)
-               }
-          }
-     }
-
-     override fun onBufferingProgressUpdated(progress: Int) {
-     }
 
      override fun onError() {
-
+          onPlayStopped()
+          Toast.makeText(getApplication(),"ERROR", Toast.LENGTH_LONG).show()
      }
 
      override fun play(itemPosition: Int) {
@@ -133,8 +130,21 @@ class SongListViewModel(
           }
      }
 
+     override fun play() {
+          if (currentPlayIndex.value != INIT_POSITION) {
+               play(currentPlayIndex.value!!)
+          }
+     }
+
      override fun pause(itemPosition: Int) {
+          pause()
+     }
+
+     override fun pause() {
           player.pause()
+     }
+
+     override fun stop() {
      }
 
 

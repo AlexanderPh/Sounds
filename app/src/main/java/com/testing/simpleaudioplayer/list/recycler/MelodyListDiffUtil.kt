@@ -7,8 +7,8 @@ import com.testing.simpleaudioplayer.model.PlayableMelody
 
 
 class MelodyListDiffUtil(
-    private val oldItems: ArrayList<PlayableMelody>,
-    private val newItems: ArrayList<PlayableMelody>
+    private val oldItems: List<PlayableMelody>,
+    private val newItems: List<PlayableMelody>
 ) : DiffUtil.Callback() {
     override fun getOldListSize(): Int {
         return oldItems.size
@@ -19,14 +19,14 @@ class MelodyListDiffUtil(
     }
 
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return oldItems[oldItemPosition] == newItems[newItemPosition]
+        return oldItems[oldItemPosition].id == newItems[newItemPosition].id
     }
 
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
         val oldItem = oldItems[oldItemPosition]
         val newItem = newItems[newItemPosition]
 
-        return oldItem.state == newItem.state || oldItem.progress == newItem.progress
+        return oldItem.state == newItem.state && oldItem.progress == newItem.progress
     }
 
     override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {

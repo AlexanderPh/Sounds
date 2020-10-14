@@ -3,7 +3,6 @@ package com.testing.player
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
-import java.util.concurrent.atomic.AtomicBoolean
 
 class PlayerProvider(
     private val callback: PlayerProviderCallback?
@@ -15,6 +14,7 @@ class PlayerProvider(
     init {
         player.setOnCompletionListener(this)
         player.setOnPreparedListener(this)
+        player.setOnErrorListener(this)
     }
     private val handler = Handler(Looper.getMainLooper())
 
@@ -25,7 +25,7 @@ class PlayerProvider(
             val progress : Float = (current / max ) * 100f
 
             callback?.onProgressUpdated(progress.toInt())
-            handler.postDelayed(this, 100)
+            handler.postDelayed(this, 1000)
         }
     }
 
@@ -33,10 +33,11 @@ class PlayerProvider(
 
     fun playSoundFromUrl(url: String?){
         if (url != currentUrl){
+            handler.removeCallbacks(runnable)
             currentUrl = url
             currentUrl.let {
                 player.reset()
-                player.setDataSource(url)
+                player.setDataSource(it)
                 player.prepareAsync()
                 callback?.onDataSourcePrepareStarted()
             }
@@ -50,7 +51,8 @@ class PlayerProvider(
     }
 
     override fun onCompletion(mp: MediaPlayer?) {
-        player.stop()
+        player.reset()
+        handler.removeCallbacks(runnable)
         callback?.onPlayStopped()
 
     }
@@ -65,13 +67,13 @@ class PlayerProvider(
     fun pause(){
         if (player.isPlaying) {
             player.pause()
-
-            callback?.onPlayStopped()
+            callback?.onPlayerPaused()
         }
     }
 
     override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
         callback?.onError()
+        player.reset()
         return false
     }
 

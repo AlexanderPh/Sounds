@@ -4,13 +4,13 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.testing.core.setDivider
 import com.testing.simpleaudioplayer.R
 import com.testing.simpleaudioplayer.list.recycler.ItemAnimator
 import com.testing.simpleaudioplayer.list.recycler.MelodyListAdapter
 import com.testing.simpleaudioplayer.list.viewmodel.SongListViewModel
-import com.testing.simpleaudioplayer.list.viewmodel.SongListViewModel.Action.LoadList
 import kotlinx.android.synthetic.main.fragment_song_list.*
 
 class SongListFragment : Fragment(R.layout.fragment_song_list) {
@@ -34,21 +34,26 @@ class SongListFragment : Fragment(R.layout.fragment_song_list) {
         list.itemAnimator = ItemAnimator()
         list.setDivider(R.drawable.melody_list_item_divider)
 
-        viewModel.melodyList.observe(viewLifecycleOwner, {
-            listAdapter.setNewItems(it)
+        viewModel.melodyList.observe(viewLifecycleOwner, Observer{
+            listAdapter.items = it
         })
 
-        viewModel.currentPlay.observe(viewLifecycleOwner,{
+        viewModel.currentPlay.observe(viewLifecycleOwner, Observer{
             it?.let {
                 currentPlay.bind(it)
             }
         })
+        viewModel.loadList(R.raw.test_list)
+    }
 
-        viewModel.currentPlayIndex.observe(viewLifecycleOwner,{
-            listAdapter.currentIndex = it
-        })
-        viewModel.onAction(LoadList(R.raw.test_list))
+    override fun onResume() {
+        super.onResume()
+        viewModel.play()
+    }
 
+    override fun onPause() {
+        super.onPause()
+        viewModel.pause()
 
     }
 }
