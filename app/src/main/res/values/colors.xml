@@ -13,4 +13,5 @@
 
     <color name="colorWhite">#ffffff</color>
     <color name="colorBlack">#000000</color>
+    <color name="blur_overlay_color">#4DF1F1F1</color>
 </resources>

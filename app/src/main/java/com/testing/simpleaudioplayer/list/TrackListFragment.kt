@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.testing.core.setDivider
 import com.testing.simpleaudioplayer.R
@@ -33,12 +32,13 @@ class TrackListFragment : Fragment(R.layout.fragment_song_list) {
         list.adapter = listAdapter
         list.itemAnimator = ItemAnimator()
         list.setDivider(R.drawable.track_list_item_divider)
+        currentPlay.setUpBlurView(list)
 
-        viewModel.tracks.observe(viewLifecycleOwner, Observer{
+        viewModel.tracks.observe(viewLifecycleOwner, {
             listAdapter.updateItems(it)
         })
 
-        viewModel.currentTrack.observe(viewLifecycleOwner, Observer{
+        viewModel.currentTrack.observe(viewLifecycleOwner, {
             currentPlay.bind(it)
 
         })

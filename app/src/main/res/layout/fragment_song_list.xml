@@ -51,8 +51,7 @@
         <com.testing.simpleaudioplayer.views.CurrentPlayView
             android:id="@+id/currentPlay"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/colorSecondaryVariant"
+            android:layout_height="56dp"
             />
 
         <androidx.recyclerview.widget.RecyclerView

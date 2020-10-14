@@ -5,6 +5,8 @@ import android.content.Context
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
@@ -14,6 +16,8 @@ import com.testing.core.*
 import com.testing.simpleaudioplayer.R
 import com.testing.simpleaudioplayer.list.recycler.PlayerControlCallback
 import com.testing.simpleaudioplayer.model.PlayableTrack
+import eightbitlab.com.blurview.BlurView
+import eightbitlab.com.blurview.RenderScriptBlur
 
 
 private const val COVER_VIEW_ID = 929
@@ -147,8 +151,18 @@ class CurrentPlayView @JvmOverloads constructor(
         progressDrawable = context.getDrawableCompat(R.drawable.list_item_progress_drawable)
     }
 
+    val blurView = BlurView(context).apply {
+        layoutParams = LayoutParams(
+            LayoutParams.MATCH_PARENT,
+            LayoutParams.WRAP_CONTENT
+        ).apply {
+            addRule(ALIGN_PARENT_TOP)
+            addRule(ALIGN_PARENT_BOTTOM)
+        }
+    }
 
     init {
+        addView(blurView)
         addView(coverView)
         addView(closeView)
         addView(trackTitle)
@@ -163,6 +177,14 @@ class CurrentPlayView @JvmOverloads constructor(
             controlCallback?.itemClicked()
 
         }
+
+    }
+
+    fun setUpBlurView(rootView: ViewGroup){
+        blurView.setupWith(rootView)
+            .setBlurRadius(20f)
+            .setOverlayColor(context.color(R.color.blur_overlay_color))
+            .setBlurAlgorithm(RenderScriptBlur(context))
 
     }
     fun bind(track: PlayableTrack?) {
