@@ -73,6 +73,7 @@ class PlayerProvider(
 
     override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
         callback?.onError()
+        handler.removeCallbacks(runnable)
         player.reset()
         return false
     }
