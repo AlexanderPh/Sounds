@@ -1,6 +1,6 @@
 package com.testing.repository.model
 
-data class Melody (
+data class Track (
     val id: Int,
     val name: String,
     val path: String?,

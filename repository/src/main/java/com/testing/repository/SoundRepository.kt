@@ -3,7 +3,7 @@ package com.testing.repository
 import android.app.Application
 import android.content.res.Resources
 import com.google.gson.Gson
-import com.testing.repository.model.Melody
+import com.testing.repository.model.Track
 import com.testing.repository.model.Result
 import java.io.InputStreamReader
 import java.lang.Exception
@@ -14,15 +14,15 @@ class SoundRepository(private val application: Application) {
 
     suspend fun loadFromRaw(rawId: Int) : Result {
         return try {
-            val melodyList  = arrayListOf<Melody>()
+            val trackList  = arrayListOf<Track>()
             InputStreamReader(resources.openRawResource(rawId)).use { reader ->
-                val melodyData = Gson().fromJson(reader, Array<Melody>::class.java)
-                melodyData?.let {
-                    melodyList.addAll(it)
+                val trackData = Gson().fromJson(reader, Array<Track>::class.java)
+                trackData?.let {
+                    trackList.addAll(it)
 
                 }
             }
-            Result.Success(melodyList)
+            Result.Success(trackList)
         } catch (ex: Exception){
             Result.Failed(ex)
         }

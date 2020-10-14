@@ -1,18 +1,19 @@
 package com.testing.simpleaudioplayer.views
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import androidx.appcompat.widget.AppCompatImageView
 import com.google.android.material.textview.MaterialTextView
-import com.testing.core.color
-import com.testing.core.getDimension
-import com.testing.core.getDrawableCompat
-import com.testing.core.getFontCompat
+import com.testing.core.*
 import com.testing.simpleaudioplayer.R
+import com.testing.simpleaudioplayer.list.recycler.PlayerControlCallback
+import com.testing.simpleaudioplayer.model.PlayableTrack
 
 
 private const val COVER_VIEW_ID = 929
@@ -20,23 +21,39 @@ private const val TITLE_VIEW_ID = 930
 private const val PROGRESS_VIEW_ID = 931
 private const val CLOSE_VIEW_ID = 932
 
+private const val EXPANDED_MULTIPLIER = 1f
+private const val COLLAPSED_MULTIPLIER = 0f
+
 class CurrentPlayView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : RelativeLayout(context, attrs, defStyleAttr) {
 
+    var controlCallback : PlayerControlCallback? = null
 
-    val titleText = context.getString(R.string.now_playing_title)
 
+    private var targetMultiplier = 0f
+    private var multiplier : Float = 0f
+        set(value) {
+            field = value
+            requestLayout()
+        }
+
+
+    private val animator: ValueAnimator = ValueAnimator().apply {
+        duration = 300
+        interpolator = AccelerateDecelerateInterpolator()
+        addUpdateListener {
+            multiplier = it.animatedValue as Float
+        }
+    }
+
+    private val titleText = context.getString(R.string.now_playing_title)
     private val horizontalMargin = context.getDimension(
         R.dimen.list_item_horizontal_margin
     ).toInt()
-
-
     private val verticalMargin = context.getDimension(
         R.dimen.list_item_vertical_margin
     ).toInt()
-
-
     private val iconSize = context.getDimension(
         R.dimen.close_icon_size
     ).toInt()
@@ -66,7 +83,6 @@ class CurrentPlayView @JvmOverloads constructor(
             iconSize,
             iconSize
         ).apply {
-           // addRule(ALIGN_PARENT_TOP)
             addRule(ALIGN_PARENT_END)
             addRule(CENTER_VERTICAL)
             setMargins(horizontalMargin, verticalMargin, horizontalMargin, verticalMargin)
@@ -74,7 +90,7 @@ class CurrentPlayView @JvmOverloads constructor(
         setImageDrawable(context.getDrawableCompat(R.drawable.ic_close))
     }
 
-    private val melodyTitle = MaterialTextView(context).apply {
+    private val trackTitle = MaterialTextView(context).apply {
         id = TITLE_VIEW_ID
         layoutParams = LayoutParams(
             LayoutParams.MATCH_PARENT,
@@ -128,7 +144,6 @@ class CurrentPlayView @JvmOverloads constructor(
         }
 
         max = 100
-        progress = 30
         progressDrawable = context.getDrawableCompat(R.drawable.list_item_progress_drawable)
     }
 
@@ -136,8 +151,60 @@ class CurrentPlayView @JvmOverloads constructor(
     init {
         addView(coverView)
         addView(closeView)
-        addView(melodyTitle)
+        addView(trackTitle)
         addView(progress)
+
+        closeView.onClick {
+            controlCallback?.itemClosed()
+            collapse()
+        }
+
+        coverView.onClick {
+            controlCallback?.itemClicked()
+
+        }
+
+    }
+    fun bind(track: PlayableTrack?) {
+        track?.let {
+            trackTitle.text = "$titleText ${track.name}"
+            coverView.playingState = track.state
+            progress.progress = track.progress
+            expand()
+        } ?: collapse()
+
+    }
+
+    private fun collapse(){
+        if (targetMultiplier == COLLAPSED_MULTIPLIER) return
+        targetMultiplier = COLLAPSED_MULTIPLIER
+        animator.cancel()
+        applyAnimation(multiplier, targetMultiplier)
+
+    }
+    private fun expand(){
+        if (targetMultiplier == EXPANDED_MULTIPLIER) return
+        targetMultiplier = EXPANDED_MULTIPLIER
+        animator.cancel()
+        applyAnimation(multiplier, targetMultiplier)
+    }
+
+
+
+    private fun applyAnimation(start: Float, end: Float) {
+        animator.setFloatValues(start, end)
+        animator.start()
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+
+
+        val w = (measuredWidth * multiplier).toInt()
+        val h = (measuredHeight * multiplier).toInt()
+
+        setMeasuredDimension(w, h)
+
     }
 
 }

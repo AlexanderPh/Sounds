@@ -8,34 +8,46 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.google.android.material.textview.MaterialTextView
 import com.testing.core.*
 import com.testing.simpleaudioplayer.R
-import com.testing.simpleaudioplayer.model.PlayableMelody
+import com.testing.simpleaudioplayer.model.PlayableTrack
 import com.testing.simpleaudioplayer.views.InteractableCoverView
+import com.testing.simpleaudioplayer.views.PlayingState
 
 private const val COVER_VIEW_ID = 1700
 private const val TITLE_VIEW_ID = 1701
 private const val PROGRESS_VIEW_ID = 1702
 
-class MelodyViewHolder(
-    view: View,
+class TrackViewHolder(
+    private val view: View,
     private val coverView: InteractableCoverView,
-    private val melodyTitle: MaterialTextView,
+    private val trackTitle: MaterialTextView,
     private val progress: ProgressBar
 
 ) : RecyclerView.ViewHolder(view){
 
-    fun bind(melody: PlayableMelody){
-        melodyTitle.text = melody.name
-        coverView.bind(melody.coverPath)
-        progress.progress = melody.progress
+    fun setProgress(progressValue: Int){
+        progress.progress = progressValue
+    }
+
+    fun setState(state: PlayingState){
+        coverView.playingState = state
+    }
+
+    fun bind(track: PlayableTrack, callback: PlayerControlCallback?){
+        trackTitle.text = track.name
+        coverView.bind(track.coverPath)
+        coverView.playingState = track.state
+        progress.progress = track.progress
+        view.onClick {
+            callback?.itemClicked(this.adapterPosition)
+        }
     }
 
 
     companion object{
-        fun create(context: Context) : MelodyViewHolder {
+        fun create(context: Context) : TrackViewHolder {
             /*
             * Верстка для Вьюхолдера создается программно, просто для примера
             * Из плюсов - не надо парсить xml-разметку, работает быстрее
@@ -84,7 +96,7 @@ class MelodyViewHolder(
 
             }
 
-            val melodyTitle = MaterialTextView(context).apply {
+            val trackTitle = MaterialTextView(context).apply {
                 id = TITLE_VIEW_ID
                 layoutParams = RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
@@ -143,14 +155,9 @@ class MelodyViewHolder(
 
 
             rootLayout.addView(coverView)
-            rootLayout.addView(melodyTitle)
+            rootLayout.addView(trackTitle)
             rootLayout.addView(progress)
-
-            rootLayout.onClick {
-                coverView.setState(InteractableCoverView.State.Loading)
-            }
-
-            return MelodyViewHolder(rootLayout, coverView, melodyTitle, progress)
+            return TrackViewHolder(rootLayout, coverView, trackTitle, progress)
         }
     }
 }

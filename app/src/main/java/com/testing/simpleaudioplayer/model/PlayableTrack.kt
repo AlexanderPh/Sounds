@@ -1,10 +1,12 @@
 package com.testing.simpleaudioplayer.model
 
-data class PlayableMelody(
+import com.testing.simpleaudioplayer.views.PlayingState
+
+data class PlayableTrack(
     val id: Int,
     val name: String,
     val previewPath: String?,
     val coverPath: String?,
-    var isPlaying: Boolean = false,
+    var state: PlayingState = PlayingState.OnStop,
     var progress: Int = 0
 )
