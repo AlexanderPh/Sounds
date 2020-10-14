@@ -77,6 +77,10 @@ class PlayerProvider(
         return false
     }
 
+    fun reset() {
+        player.reset()
+    }
+
 }
 
 

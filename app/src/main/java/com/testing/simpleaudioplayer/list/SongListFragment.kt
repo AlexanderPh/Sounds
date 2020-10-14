@@ -34,8 +34,8 @@ class SongListFragment : Fragment(R.layout.fragment_song_list) {
         list.itemAnimator = ItemAnimator()
         list.setDivider(R.drawable.melody_list_item_divider)
 
-        viewModel.melodyList.observe(viewLifecycleOwner, Observer{
-            listAdapter.items = it
+        viewModel.tracks.observe(viewLifecycleOwner, Observer{
+            listAdapter.updateItems(it)
         })
 
         viewModel.currentPlay.observe(viewLifecycleOwner, Observer{
@@ -48,12 +48,12 @@ class SongListFragment : Fragment(R.layout.fragment_song_list) {
 
     override fun onResume() {
         super.onResume()
-        viewModel.play()
+        //viewModel.play()
     }
 
     override fun onPause() {
         super.onPause()
-        viewModel.pause()
+       // viewModel.pause()
 
     }
 }

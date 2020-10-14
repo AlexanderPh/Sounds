@@ -3,6 +3,7 @@ package com.testing.simpleaudioplayer.views
 import android.content.Context
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.View
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import androidx.appcompat.widget.AppCompatImageView
@@ -25,8 +26,8 @@ class InteractableCoverView @JvmOverloads constructor(
     private fun updateState() {
         when (playingState){
             PlayingState.Loading -> setLoading()
-            PlayingState.OnPause -> setOnPause()
             PlayingState.Playing -> setPlaying()
+            else -> setOnPause()
         }
     }
 
@@ -80,17 +81,17 @@ class InteractableCoverView @JvmOverloads constructor(
     private fun setPlaying() {
         icon.visibility = VISIBLE
         icon.setImageDrawable(pauseDrawable)
-        progressBar.visibility = GONE
+        progressBar.visibility = View.INVISIBLE
     }
 
     private fun setOnPause() {
         icon.visibility = VISIBLE
         icon.setImageDrawable(playDrawable)
-        progressBar.visibility = GONE
+        progressBar.visibility = View.INVISIBLE
     }
 
     private fun setLoading() {
-        icon.visibility = GONE
+        icon.visibility = View.INVISIBLE
         progressBar.visibility = VISIBLE
     }
 

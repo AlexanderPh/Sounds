@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.testing.core.log
 import com.testing.simpleaudioplayer.model.PlayableMelody
 import com.testing.simpleaudioplayer.views.PlayingState
 
@@ -12,13 +13,25 @@ class MelodyListAdapter : RecyclerView.Adapter<MelodyViewHolder>() {
     var controlCallback: PlayerControlCallback? = null
 
     var items: MutableList<PlayableMelody> =  mutableListOf()
-    set(value) {
-        val diffUtil = MelodyListDiffUtil(field, value)
-        val result = DiffUtil.calculateDiff(diffUtil)
-        field.clear()
-        field.addAll(value)
-        result.dispatchUpdatesTo(this)
-    }
+
+     fun updateItems(newItems: MutableList<PlayableMelody>) {
+//         val diffUtil = MelodyListDiffUtil(items, newItems)
+//         val result = DiffUtil.calculateDiff(diffUtil)
+         items.clear()
+         items.addAll(newItems)
+            notifyDataSetChanged()
+       //  result.dispatchUpdatesTo(this)
+     }
+
+//        set(value) {
+//            val diffUtil = MelodyListDiffUtil(field, value)
+//            val result = DiffUtil.calculateDiff(diffUtil)
+//            field.clear()
+//            field.addAll(value)
+//            result.dispatchUpdatesTo(this)
+////            field = value
+////            notifyDataSetChanged()
+//        }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MelodyViewHolder {
         return MelodyViewHolder.create(parent.context)
@@ -44,8 +57,9 @@ class MelodyListAdapter : RecyclerView.Adapter<MelodyViewHolder>() {
                     val state = bundle.getSerializable(MelodyListDiffUtil.STATE_KEY) as PlayingState
                     holder.setState(state)
                 }
-            }
 
+                log(payload)
+            }
         }
     }
 

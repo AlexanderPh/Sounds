@@ -3,6 +3,7 @@ package com.testing.simpleaudioplayer.list.viewmodel
 import android.app.Application
 import android.widget.Toast
 import androidx.lifecycle.*
+import com.testing.core.log
 import com.testing.player.PlayerProvider
 import com.testing.player.PlayerProviderCallback
 import com.testing.simpleaudioplayer.list.recycler.PlayerControlCallback
@@ -10,9 +11,8 @@ import com.testing.simpleaudioplayer.model.PlayableMelody
 import com.testing.simpleaudioplayer.views.PlayingState
 import kotlinx.coroutines.launch
 
-const val INIT_POSITION = -1
 class SongListViewModel(
-      application: Application
+     application: Application
 ) : AndroidViewModel(application), PlayerProviderCallback, PlayerControlCallback {
 
      private val interactor = MelodyInteractor.getInstance(application)
@@ -20,15 +20,14 @@ class SongListViewModel(
 
 
      val currentPlay = MutableLiveData<PlayableMelody?>(null)
-     private val currentPlayIndex = MutableLiveData(INIT_POSITION)
-     val melodyList = MutableLiveData<MutableList<PlayableMelody>>(mutableListOf())
+     val tracks = MutableLiveData<MutableList<PlayableMelody>>(mutableListOf())
 
 
 
      fun loadList(resId: Int) = viewModelScope.launch {
           val list = interactor.loadList(resId)
           list?.let {
-               melodyList.postValue(it)
+               tracks.postValue(it)
           }
      }
 
@@ -37,8 +36,8 @@ class SongListViewModel(
 
      //коллбэк от плеера при начала воспроизведения
      override fun onPlayStarted() {
-          currentPlay.value?.let { melody ->
-               val updatedMelody = melody.copy(
+          currentPlay.value?.let { track ->
+               val updatedMelody = track.copy(
                     state = PlayingState.Playing
                )
                updateList(updatedMelody)
@@ -49,13 +48,7 @@ class SongListViewModel(
 
      //коллбэк от плеера при паузе воспроизведения
      override fun onPlayerPaused() {
-          currentPlay.value?.let { melody ->
-               val updatedMelody = melody.copy(
-                    state = PlayingState.OnPause
-               )
-               updateList(updatedMelody)
-               currentPlay.setValue(updatedMelody)
-          }
+
      }
 
 
@@ -73,13 +66,7 @@ class SongListViewModel(
 
      //коллбэк от плеера о начале буферизации
      override fun onDataSourcePrepareStarted() {
-          currentPlay.value?.let { melody ->
-               val updatedMelody = melody.copy(
-                    state = PlayingState.Loading
-               )
-               updateList(updatedMelody)
-               currentPlay.setValue(updatedMelody)
-          }
+
      }
 
      //коллбэк от плеера с прогрессом воспроизведения
@@ -101,12 +88,16 @@ class SongListViewModel(
      }
 
      private fun updateList(updatedMelody: PlayableMelody) {
-          melodyList.value?.let {
-               val index = currentPlayIndex.value
-               if (index!! != -1){
-                    it[index]= updatedMelody
+          tracks.value?.let {
+               val inList = it.find {track ->
+                    track.id == updatedMelody.id
                }
-               melodyList.postValue(it)
+
+               if (inList != null){
+                    val indexOf = it.indexOf(inList)
+                    it[indexOf] = updatedMelody
+                    tracks.postValue(it)
+               }
           }
      }
 
@@ -117,35 +108,106 @@ class SongListViewModel(
           Toast.makeText(getApplication(),"ERROR", Toast.LENGTH_LONG).show()
      }
 
-     override fun play(itemPosition: Int) {
-          if (melodyList.value?.get(itemPosition) != null){
-               val melody = melodyList.value?.get(itemPosition)
-               if (currentPlay.value?.id == melody?.id){
-                    player.play()
-               } else {
-                    currentPlay.postValue(melody)
-                    currentPlayIndex.value = itemPosition
-                    player.playSoundFromUrl(melody?.previewPath)
+
+     override fun itemClicked(itemPosition: Int) {
+          handleTrack(itemPosition)
+
+     }
+
+     override fun itemClicked() {
+
+     }
+
+     override fun itemClosed() {
+     }
+
+     private fun handleTrack(itemPosition: Int) {
+          val trackList = tracks.value
+          trackList?.let { list ->
+               val selectedTrack = list[itemPosition]
+               val currentTrack = list.find {
+                    it.state == PlayingState.Loading
+                            || it.state == PlayingState.Playing
+                            || it.state == PlayingState.OnPause
                }
+               currentTrack?.let { ct ->
+                    if (ct.id == selectedTrack.id){
+                         when (ct.state){
+                              PlayingState.Playing -> {
+                                   pauseTrack(selectedTrack, itemPosition, list)
+                              }
+                              PlayingState.OnPause -> {
+                                   playTrack(selectedTrack, itemPosition, list)
+                              }
+                              else -> return
+                         }
+                    } else {
+                         switchTrack(selectedTrack, ct, itemPosition, list)
+                    }
+               } ?: startNewTrack(selectedTrack, itemPosition, list)
+
           }
      }
 
-     override fun play() {
-          if (currentPlayIndex.value != INIT_POSITION) {
-               play(currentPlayIndex.value!!)
-          }
+     private fun switchTrack(
+          selectedTrack: PlayableMelody,
+          currentTrack: PlayableMelody,
+          itemPosition: Int,
+          list: MutableList<PlayableMelody>
+     ) {
+          val currentTrackPosition = list.indexOf(currentTrack)
+          currentTrack.state = PlayingState.OnStop
+          currentTrack.progress = 0
+          selectedTrack.state = PlayingState.Loading
+          list[currentTrackPosition] = currentTrack
+          list[itemPosition] = selectedTrack
+          currentPlay.postValue(selectedTrack)
+          tracks.postValue(list)
+          player.playSoundFromUrl(selectedTrack.previewPath)
+          log("ON_SWITCH")
+
      }
 
-     override fun pause(itemPosition: Int) {
-          pause()
+     private fun playTrack(
+          selectedTrack: PlayableMelody,
+          listPosition: Int,
+          list: MutableList<PlayableMelody>
+     ) {
+          selectedTrack.state = PlayingState.Playing
+          list[listPosition] = selectedTrack
+          currentPlay.postValue(selectedTrack)
+          tracks.postValue(list)
+          player.play()
+          log("ON_PLAY")
      }
 
-     override fun pause() {
+     private fun pauseTrack(
+          selectedTrack: PlayableMelody,
+          listPosition: Int,
+          list: MutableList<PlayableMelody>
+     ) {
+          selectedTrack.state = PlayingState.OnPause
+          list[listPosition] = selectedTrack
+          currentPlay.postValue(selectedTrack)
+          tracks.postValue(list)
           player.pause()
+          log("ON_PAUSE")
+
+
      }
 
-     override fun stop() {
-     }
+     private fun startNewTrack(
+          selectedTrack: PlayableMelody,
+          listPosition: Int,
+          list: MutableList<PlayableMelody>
+     ) {
+          selectedTrack.state = PlayingState.Loading
+          list[listPosition] = selectedTrack
+          currentPlay.postValue(selectedTrack)
+          tracks.postValue(list)
+          player.playSoundFromUrl(selectedTrack.previewPath)
+          log("ON_START_NEW")
 
+     }
 
 }

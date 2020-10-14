@@ -41,11 +41,7 @@ class MelodyViewHolder(
         coverView.playingState = melody.state
         progress.progress = melody.progress
         view.onClick {
-            when(coverView.playingState){
-                PlayingState.OnPause -> callback?.play(this.adapterPosition)
-                PlayingState.Playing -> callback?.pause(this.adapterPosition)
-                else -> return@onClick
-            }
+            callback?.itemClicked(this.adapterPosition)
         }
     }
 

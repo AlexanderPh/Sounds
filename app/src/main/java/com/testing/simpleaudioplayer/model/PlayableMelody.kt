@@ -7,6 +7,6 @@ data class PlayableMelody(
     val name: String,
     val previewPath: String?,
     val coverPath: String?,
-    var state: PlayingState = PlayingState.OnPause,
+    var state: PlayingState = PlayingState.OnStop,
     var progress: Int = 0
 )
