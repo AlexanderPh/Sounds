@@ -2,7 +2,7 @@ package com.testing.simpleaudioplayer.model
 
 import com.testing.simpleaudioplayer.views.PlayingState
 
-data class PlayableMelody(
+data class PlayableTrack(
     val id: Int,
     val name: String,
     val previewPath: String?,

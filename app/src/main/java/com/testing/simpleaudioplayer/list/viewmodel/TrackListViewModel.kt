@@ -3,24 +3,23 @@ package com.testing.simpleaudioplayer.list.viewmodel
 import android.app.Application
 import android.widget.Toast
 import androidx.lifecycle.*
-import com.testing.core.log
 import com.testing.player.PlayerProvider
 import com.testing.player.PlayerProviderCallback
 import com.testing.simpleaudioplayer.list.recycler.PlayerControlCallback
-import com.testing.simpleaudioplayer.model.PlayableMelody
+import com.testing.simpleaudioplayer.model.PlayableTrack
 import com.testing.simpleaudioplayer.views.PlayingState
 import kotlinx.coroutines.launch
 
-class SongListViewModel(
+class TrackListViewModel(
      application: Application
 ) : AndroidViewModel(application), PlayerProviderCallback, PlayerControlCallback {
 
-     private val interactor = MelodyInteractor.getInstance(application)
+     private val interactor = TrackInteractor.getInstance(application)
      private val player = PlayerProvider(this)
 
 
-     val currentTrack = MutableLiveData<PlayableMelody?>(null)
-     val tracks = MutableLiveData<MutableList<PlayableMelody>>(mutableListOf())
+     val currentTrack = MutableLiveData<PlayableTrack?>(null)
+     val tracks = MutableLiveData<MutableList<PlayableTrack>>(mutableListOf())
 
 
 
@@ -35,11 +34,11 @@ class SongListViewModel(
      //коллбэк от плеера при начале воспроизведения
      override fun onPlayStarted() {
           currentTrack.value?.let { track ->
-               val updatedMelody = track.copy(
+               val updatedTrack = track.copy(
                     state = PlayingState.Playing
                )
-               updateList(updatedMelody)
-               currentTrack.postValue(updatedMelody)
+               updateList(updatedTrack)
+               currentTrack.postValue(updatedTrack)
           }
      }
 
@@ -51,12 +50,12 @@ class SongListViewModel(
 
      //коллбэк от плеера при окончании воспроизведения
      override fun onPlayStopped() {
-          currentTrack.value?.let { melody ->
-               val updatedMelody = melody.copy(
+          currentTrack.value?.let { track ->
+               val updatedTrack = track.copy(
                     state = PlayingState.OnStop,
                     progress = 0
                )
-               updateList(updatedMelody)
+               updateList(updatedTrack)
                currentTrack.postValue(null)
           }
      }
@@ -69,31 +68,30 @@ class SongListViewModel(
 
      //коллбэк от плеера с прогрессом воспроизведения
      override fun onProgressUpdated(progress: Int) {
-          currentTrack.value?.let { melody ->
-               val updatedMelody = melody.copy(
+          currentTrack.value?.let { track ->
+               val updatedTrack = track.copy(
                     progress = progress
                )
-               updateList(updatedMelody)
-               currentTrack.setValue(updatedMelody)
+               updateList(updatedTrack)
+               currentTrack.setValue(updatedTrack)
           }
      }
 
      //коллбэк от плеера с прогрессом буферизации
 
      override fun onBufferingProgressUpdated(progress: Int) {
-          // на всякий, но не имплементируем
 
      }
 
-     private fun updateList(updatedMelody: PlayableMelody) {
+     private fun updateList(updatedTrack: PlayableTrack) {
           tracks.value?.let {
                val inList = it.find {track ->
-                    track.id == updatedMelody.id
+                    track.id == updatedTrack.id
                }
 
                if (inList != null){
                     val indexOf = it.indexOf(inList)
-                    it[indexOf] = updatedMelody
+                    it[indexOf] = updatedTrack
                     tracks.postValue(it)
                }
           }
@@ -170,10 +168,10 @@ class SongListViewModel(
      }
 
      private fun switchTrack(
-          selectedTrack: PlayableMelody,
-          currentTrack: PlayableMelody,
+          selectedTrack: PlayableTrack,
+          currentTrack: PlayableTrack,
           itemPosition: Int,
-          list: MutableList<PlayableMelody>
+          list: MutableList<PlayableTrack>
      ) {
           val currentTrackPosition = list.indexOf(currentTrack)
           currentTrack.state = PlayingState.OnStop
@@ -189,9 +187,9 @@ class SongListViewModel(
      }
 
      private fun playTrack(
-          selectedTrack: PlayableMelody,
+          selectedTrack: PlayableTrack,
           listPosition: Int,
-          list: MutableList<PlayableMelody>
+          list: MutableList<PlayableTrack>
      ) {
           selectedTrack.state = PlayingState.Playing
           list[listPosition] = selectedTrack
@@ -202,9 +200,9 @@ class SongListViewModel(
      }
 
      private fun pauseTrack(
-          selectedTrack: PlayableMelody,
+          selectedTrack: PlayableTrack,
           listPosition: Int,
-          list: MutableList<PlayableMelody>
+          list: MutableList<PlayableTrack>
      ) {
           selectedTrack.state = PlayingState.OnPause
           list[listPosition] = selectedTrack
@@ -217,9 +215,9 @@ class SongListViewModel(
      }
 
      private fun startNewTrack(
-          selectedTrack: PlayableMelody,
+          selectedTrack: PlayableTrack,
           listPosition: Int,
-          list: MutableList<PlayableMelody>
+          list: MutableList<PlayableTrack>
      ) {
           selectedTrack.state = PlayingState.Loading
           list[listPosition] = selectedTrack

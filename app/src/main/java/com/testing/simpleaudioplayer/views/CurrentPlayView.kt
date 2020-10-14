@@ -13,7 +13,7 @@ import com.google.android.material.textview.MaterialTextView
 import com.testing.core.*
 import com.testing.simpleaudioplayer.R
 import com.testing.simpleaudioplayer.list.recycler.PlayerControlCallback
-import com.testing.simpleaudioplayer.model.PlayableMelody
+import com.testing.simpleaudioplayer.model.PlayableTrack
 
 
 private const val COVER_VIEW_ID = 929
@@ -83,7 +83,6 @@ class CurrentPlayView @JvmOverloads constructor(
             iconSize,
             iconSize
         ).apply {
-            // addRule(ALIGN_PARENT_TOP)
             addRule(ALIGN_PARENT_END)
             addRule(CENTER_VERTICAL)
             setMargins(horizontalMargin, verticalMargin, horizontalMargin, verticalMargin)
@@ -91,7 +90,7 @@ class CurrentPlayView @JvmOverloads constructor(
         setImageDrawable(context.getDrawableCompat(R.drawable.ic_close))
     }
 
-    private val melodyTitle = MaterialTextView(context).apply {
+    private val trackTitle = MaterialTextView(context).apply {
         id = TITLE_VIEW_ID
         layoutParams = LayoutParams(
             LayoutParams.MATCH_PARENT,
@@ -152,7 +151,7 @@ class CurrentPlayView @JvmOverloads constructor(
     init {
         addView(coverView)
         addView(closeView)
-        addView(melodyTitle)
+        addView(trackTitle)
         addView(progress)
 
         closeView.onClick {
@@ -166,11 +165,11 @@ class CurrentPlayView @JvmOverloads constructor(
         }
 
     }
-    fun bind(melody: PlayableMelody?) {
-        melody?.let {
-            melodyTitle.text = "$titleText ${melody.name}"
-            coverView.playingState = melody.state
-            progress.progress = melody.progress
+    fun bind(track: PlayableTrack?) {
+        track?.let {
+            trackTitle.text = "$titleText ${track.name}"
+            coverView.playingState = track.state
+            progress.progress = track.progress
             expand()
         } ?: collapse()
 

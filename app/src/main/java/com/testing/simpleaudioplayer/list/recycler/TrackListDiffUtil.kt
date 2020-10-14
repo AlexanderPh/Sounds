@@ -1,15 +1,14 @@
 package com.testing.simpleaudioplayer.list.recycler
 
-import android.os.Bundle
 import androidx.recyclerview.widget.DiffUtil
 import com.testing.core.log
-import com.testing.simpleaudioplayer.model.PlayableMelody
+import com.testing.simpleaudioplayer.model.PlayableTrack
 
 
 
-class MelodyListDiffUtil(
-    private val oldItems: List<PlayableMelody>,
-    private val newItems: List<PlayableMelody>
+class TrackListDiffUtil(
+    private val oldItems: List<PlayableTrack>,
+    private val newItems: List<PlayableTrack>
 ) : DiffUtil.Callback() {
     override fun getOldListSize(): Int {
         return oldItems.size

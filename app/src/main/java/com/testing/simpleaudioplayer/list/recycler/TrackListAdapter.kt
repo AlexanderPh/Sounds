@@ -2,19 +2,18 @@ package com.testing.simpleaudioplayer.list.recycler
 
 import android.os.Bundle
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.testing.core.log
-import com.testing.simpleaudioplayer.model.PlayableMelody
+import com.testing.simpleaudioplayer.model.PlayableTrack
 import com.testing.simpleaudioplayer.views.PlayingState
 
-class MelodyListAdapter : RecyclerView.Adapter<MelodyViewHolder>() {
+class TrackListAdapter : RecyclerView.Adapter<TrackViewHolder>() {
 
     var controlCallback: PlayerControlCallback? = null
 
-    var items: MutableList<PlayableMelody> =  mutableListOf()
+    var items: MutableList<PlayableTrack> =  mutableListOf()
 
-     fun updateItems(newItems: MutableList<PlayableMelody>) {
+     fun updateItems(newItems: MutableList<PlayableTrack>) {
 //         val diffUtil = MelodyListDiffUtil(items, newItems)
 //         val result = DiffUtil.calculateDiff(diffUtil)
          items.clear()
@@ -33,14 +32,14 @@ class MelodyListAdapter : RecyclerView.Adapter<MelodyViewHolder>() {
 ////            notifyDataSetChanged()
 //        }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MelodyViewHolder {
-        return MelodyViewHolder.create(parent.context)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
+        return TrackViewHolder.create(parent.context)
     }
 
 
 
     override fun onBindViewHolder(
-        holder: MelodyViewHolder,
+        holder: TrackViewHolder,
         position: Int,
         payloads: MutableList<Any>
     ) {
@@ -49,12 +48,12 @@ class MelodyListAdapter : RecyclerView.Adapter<MelodyViewHolder>() {
         } else {
             payloads.forEach { payload ->
                 val bundle = payload as Bundle
-                if (bundle.containsKey(MelodyListDiffUtil.PROGRESS_KEY)){
-                    val progress = bundle.getInt(MelodyListDiffUtil.PROGRESS_KEY)
+                if (bundle.containsKey(TrackListDiffUtil.PROGRESS_KEY)){
+                    val progress = bundle.getInt(TrackListDiffUtil.PROGRESS_KEY)
                     holder.setProgress(progress)
                 }
-                if (bundle.containsKey(MelodyListDiffUtil.STATE_KEY)){
-                    val state = bundle.getSerializable(MelodyListDiffUtil.STATE_KEY) as PlayingState
+                if (bundle.containsKey(TrackListDiffUtil.STATE_KEY)){
+                    val state = bundle.getSerializable(TrackListDiffUtil.STATE_KEY) as PlayingState
                     holder.setState(state)
                 }
 
@@ -63,7 +62,7 @@ class MelodyListAdapter : RecyclerView.Adapter<MelodyViewHolder>() {
         }
     }
 
-    override fun onBindViewHolder(holder: MelodyViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         holder.bind(items[position], controlCallback)
     }
 

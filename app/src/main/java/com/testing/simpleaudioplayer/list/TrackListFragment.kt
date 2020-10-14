@@ -9,17 +9,17 @@ import androidx.lifecycle.ViewModelProvider
 import com.testing.core.setDivider
 import com.testing.simpleaudioplayer.R
 import com.testing.simpleaudioplayer.list.recycler.ItemAnimator
-import com.testing.simpleaudioplayer.list.recycler.MelodyListAdapter
-import com.testing.simpleaudioplayer.list.viewmodel.SongListViewModel
+import com.testing.simpleaudioplayer.list.recycler.TrackListAdapter
+import com.testing.simpleaudioplayer.list.viewmodel.TrackListViewModel
 import kotlinx.android.synthetic.main.fragment_song_list.*
 
-class SongListFragment : Fragment(R.layout.fragment_song_list) {
+class TrackListFragment : Fragment(R.layout.fragment_song_list) {
 
-    private val viewModel: SongListViewModel by lazy {
+    private val viewModel: TrackListViewModel by lazy {
         ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)
-        ).get(SongListViewModel::class.java)
+        ).get(TrackListViewModel::class.java)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -28,11 +28,11 @@ class SongListFragment : Fragment(R.layout.fragment_song_list) {
         (activity as AppCompatActivity).setSupportActionBar(toolbar)
 
 
-        val listAdapter = MelodyListAdapter()
+        val listAdapter = TrackListAdapter()
         listAdapter.controlCallback = viewModel
         list.adapter = listAdapter
         list.itemAnimator = ItemAnimator()
-        list.setDivider(R.drawable.melody_list_item_divider)
+        list.setDivider(R.drawable.track_list_item_divider)
 
         viewModel.tracks.observe(viewLifecycleOwner, Observer{
             listAdapter.updateItems(it)
