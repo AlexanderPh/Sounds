@@ -78,7 +78,15 @@ class PlayerProvider(
     }
 
     fun reset() {
+        player.stop()
+        handler.removeCallbacks(runnable)
         player.reset()
+    }
+
+    fun release() {
+        player.stop()
+        handler.removeCallbacks(runnable)
+        player.release()
     }
 
 }

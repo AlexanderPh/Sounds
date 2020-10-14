@@ -38,22 +38,26 @@ class SongListFragment : Fragment(R.layout.fragment_song_list) {
             listAdapter.updateItems(it)
         })
 
-        viewModel.currentPlay.observe(viewLifecycleOwner, Observer{
-            it?.let {
-                currentPlay.bind(it)
-            }
+        viewModel.currentTrack.observe(viewLifecycleOwner, Observer{
+            currentPlay.bind(it)
+
         })
+        currentPlay.controlCallback = viewModel
         viewModel.loadList(R.raw.test_list)
     }
 
     override fun onResume() {
         super.onResume()
-        //viewModel.play()
+        viewModel.onLifeCycleResume()
     }
 
     override fun onPause() {
         super.onPause()
-       // viewModel.pause()
+        viewModel.onLifeCyclePause()
+    }
 
+    override fun onDestroy() {
+        viewModel.onDestroy()
+        super.onDestroy()
     }
 }

@@ -166,21 +166,24 @@ class CurrentPlayView @JvmOverloads constructor(
         }
 
     }
-    fun bind(melody: PlayableMelody) {
-        melodyTitle.text = "$titleText ${melody.name}"
-        coverView.playingState = melody.state
-        progress.progress = melody.progress
-        expand()
+    fun bind(melody: PlayableMelody?) {
+        melody?.let {
+            melodyTitle.text = "$titleText ${melody.name}"
+            coverView.playingState = melody.state
+            progress.progress = melody.progress
+            expand()
+        } ?: collapse()
+
     }
 
-    fun collapse(){
+    private fun collapse(){
         if (targetMultiplier == COLLAPSED_MULTIPLIER) return
         targetMultiplier = COLLAPSED_MULTIPLIER
         animator.cancel()
         applyAnimation(multiplier, targetMultiplier)
 
     }
-    fun expand(){
+    private fun expand(){
         if (targetMultiplier == EXPANDED_MULTIPLIER) return
         targetMultiplier = EXPANDED_MULTIPLIER
         animator.cancel()
