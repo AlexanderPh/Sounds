@@ -24,6 +24,7 @@ class InteractableCoverView @JvmOverloads constructor(
         }
 
     private fun updateState() {
+        if (stateIsLocked) return
         when (playingState){
             PlayingState.Loading -> setLoading()
             PlayingState.Playing -> setPlaying()
@@ -31,6 +32,7 @@ class InteractableCoverView @JvmOverloads constructor(
         }
     }
 
+    var stateIsLocked : Boolean = false
     private val glide = Glide.with(context)
     private val cornerRadius = context
         .getDimension(R.dimen.list_item_icon_radius_size)
@@ -72,7 +74,10 @@ class InteractableCoverView @JvmOverloads constructor(
         playingState =PlayingState.OnPause
     }
 
-    fun bind( coverPath: String?) {
+    fun bind(coverPath: String?, assetPath: String?) {
+        if (assetPath.isNullOrEmpty()){
+            icon.visibility = INVISIBLE
+        }
         glide.load(coverPath).transform(RoundedCorners(cornerRadius)).into(background)
     }
 

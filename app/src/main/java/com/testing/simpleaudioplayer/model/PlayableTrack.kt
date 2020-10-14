@@ -7,6 +7,7 @@ data class PlayableTrack(
     val name: String,
     val previewPath: String?,
     val coverPath: String?,
+    val assetPath: String?,
     var state: PlayingState = PlayingState.OnStop,
     var progress: Int = 0
 )

@@ -38,11 +38,13 @@ class TrackViewHolder(
 
     fun bind(track: PlayableTrack, callback: PlayerControlCallback?){
         trackTitle.text = track.name
-        coverView.bind(track.coverPath)
+        coverView.bind(track.coverPath, track.assetPath)
         coverView.playingState = track.state
         progress.progress = track.progress
         view.onClick {
-            callback?.itemClicked(this.adapterPosition)
+            if (!coverView.stateIsLocked){
+                callback?.itemClicked(this.adapterPosition)
+            }
         }
     }
 
