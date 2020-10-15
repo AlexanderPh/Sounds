@@ -38,7 +38,7 @@ class TrackListViewModel(
                     state = PlayingState.Playing
                )
                updateList(updatedTrack)
-               currentTrack.postValue(updatedTrack)
+               currentTrack.value = updatedTrack
           }
      }
 
@@ -56,7 +56,7 @@ class TrackListViewModel(
                     progress = 0
                )
                updateList(updatedTrack)
-               currentTrack.postValue(null)
+               currentTrack.value = null
           }
      }
 
@@ -92,7 +92,7 @@ class TrackListViewModel(
                if (inList != null){
                     val indexOf = it.indexOf(inList)
                     it[indexOf] = updatedTrack
-                    tracks.postValue(it)
+                    tracks.value = it
                }
           }
      }
@@ -179,8 +179,8 @@ class TrackListViewModel(
           selectedTrack.state = PlayingState.Loading
           list[currentTrackPosition] = currentTrack
           list[itemPosition] = selectedTrack
-          this.currentTrack.postValue(selectedTrack)
-          tracks.postValue(list)
+          this.currentTrack.value = selectedTrack
+          tracks.value = list
           player.playSoundFromUrl(selectedTrack.previewPath)
        //   log("ON_SWITCH")
 
@@ -193,8 +193,8 @@ class TrackListViewModel(
      ) {
           selectedTrack.state = PlayingState.Playing
           list[listPosition] = selectedTrack
-          currentTrack.postValue(selectedTrack)
-          tracks.postValue(list)
+          currentTrack.value = selectedTrack
+          tracks.value = list
           player.play()
        //   log("ON_PLAY")
      }
@@ -206,8 +206,8 @@ class TrackListViewModel(
      ) {
           selectedTrack.state = PlayingState.OnPause
           list[listPosition] = selectedTrack
-          currentTrack.postValue(selectedTrack)
-          tracks.postValue(list)
+          currentTrack.value = selectedTrack
+          tracks.value = list
           player.pause()
          // log("ON_PAUSE")
 
@@ -221,8 +221,8 @@ class TrackListViewModel(
      ) {
           selectedTrack.state = PlayingState.Loading
           list[listPosition] = selectedTrack
-          currentTrack.postValue(selectedTrack)
-          tracks.postValue(list)
+          currentTrack.value = selectedTrack
+          tracks.value = list
           player.playSoundFromUrl(selectedTrack.previewPath)
         //  log("ON_START_NEW")
 

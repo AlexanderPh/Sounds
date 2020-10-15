@@ -2,8 +2,8 @@ package com.testing.simpleaudioplayer.list.recycler
 
 import android.os.Bundle
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.testing.core.log
 import com.testing.simpleaudioplayer.model.PlayableTrack
 import com.testing.simpleaudioplayer.views.PlayingState
 
@@ -14,28 +14,18 @@ class TrackListAdapter : RecyclerView.Adapter<TrackViewHolder>() {
     var items: MutableList<PlayableTrack> =  mutableListOf()
 
      fun updateItems(newItems: MutableList<PlayableTrack>) {
-//         val diffUtil = MelodyListDiffUtil(items, newItems)
+//         val diffUtil = TrackListDiffUtil(items, newItems)
 //         val result = DiffUtil.calculateDiff(diffUtil)
          items.clear()
          items.addAll(newItems)
-            notifyDataSetChanged()
-       //  result.dispatchUpdatesTo(this)
+         notifyDataSetChanged()
+       // result.dispatchUpdatesTo(this)
      }
 
-//        set(value) {
-//            val diffUtil = MelodyListDiffUtil(field, value)
-//            val result = DiffUtil.calculateDiff(diffUtil)
-//            field.clear()
-//            field.addAll(value)
-//            result.dispatchUpdatesTo(this)
-////            field = value
-////            notifyDataSetChanged()
-//        }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         return TrackViewHolder.create(parent.context)
     }
-
 
     //переопределение перегруженного метода позволит контролировать конкретные изменения в полях вью
     override fun onBindViewHolder(
@@ -56,7 +46,6 @@ class TrackListAdapter : RecyclerView.Adapter<TrackViewHolder>() {
                     val state = bundle.getSerializable(TrackListDiffUtil.STATE_KEY) as PlayingState
                     holder.setState(state)
                 }
-                log(payload)
             }
         }
     }
