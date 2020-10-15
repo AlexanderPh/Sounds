@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Sounds</string>
+    <string name="now_playing_title">Now playing:</string>
 </resources>
