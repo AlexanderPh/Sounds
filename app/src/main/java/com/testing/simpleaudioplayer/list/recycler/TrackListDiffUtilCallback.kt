@@ -6,7 +6,7 @@ import com.testing.simpleaudioplayer.model.PlayableTrack
 
 
 
-class TrackListDiffUtil(
+class TrackListDiffUtilCallback(
     private val oldItems: List<PlayableTrack>,
     private val newItems: List<PlayableTrack>
 ) : DiffUtil.Callback() {

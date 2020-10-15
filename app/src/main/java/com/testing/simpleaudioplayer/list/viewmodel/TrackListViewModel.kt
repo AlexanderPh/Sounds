@@ -8,6 +8,7 @@ import com.testing.player.PlayerProviderCallback
 import com.testing.simpleaudioplayer.list.recycler.PlayerControlCallback
 import com.testing.simpleaudioplayer.model.PlayableTrack
 import com.testing.simpleaudioplayer.views.PlayingState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class TrackListViewModel(
@@ -23,7 +24,7 @@ class TrackListViewModel(
 
 
 
-     fun loadList(resId: Int) = viewModelScope.launch {
+     fun loadList(resId: Int) = viewModelScope.launch(Dispatchers.IO) {
           val list = interactor.loadList(resId)
           list?.let {
                tracks.postValue(it)
@@ -174,15 +175,19 @@ class TrackListViewModel(
           list: MutableList<PlayableTrack>
      ) {
           val currentTrackPosition = list.indexOf(currentTrack)
-          currentTrack.state = PlayingState.OnStop
-          currentTrack.progress = 0
-          selectedTrack.state = PlayingState.Loading
-          list[currentTrackPosition] = currentTrack
-          list[itemPosition] = selectedTrack
-          this.currentTrack.value = selectedTrack
+          val copiedTrack = selectedTrack.copy(
+               state = PlayingState.Loading
+          )
+
+          list[currentTrackPosition] = currentTrack.copy(
+               state = PlayingState.OnStop,
+               progress = 0
+          )
+          list[itemPosition] = copiedTrack
+
+          this.currentTrack.value = copiedTrack
           tracks.value = list
           player.playSoundFromUrl(selectedTrack.previewPath)
-       //   log("ON_SWITCH")
 
      }
 
@@ -196,7 +201,7 @@ class TrackListViewModel(
           currentTrack.value = selectedTrack
           tracks.value = list
           player.play()
-       //   log("ON_PLAY")
+          //   log("ON_PLAY")
      }
 
      private fun pauseTrack(
@@ -209,7 +214,7 @@ class TrackListViewModel(
           currentTrack.value = selectedTrack
           tracks.value = list
           player.pause()
-         // log("ON_PAUSE")
+          // log("ON_PAUSE")
 
 
      }
@@ -219,12 +224,13 @@ class TrackListViewModel(
           listPosition: Int,
           list: MutableList<PlayableTrack>
      ) {
-          selectedTrack.state = PlayingState.Loading
-          list[listPosition] = selectedTrack
-          currentTrack.value = selectedTrack
+          val copiedTrack = selectedTrack.copy(
+               state = PlayingState.Loading
+          )
+          list[listPosition] = copiedTrack
+          currentTrack.value = copiedTrack
           tracks.value = list
           player.playSoundFromUrl(selectedTrack.previewPath)
-        //  log("ON_START_NEW")
 
      }
 

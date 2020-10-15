@@ -12,15 +12,20 @@ class TrackListAdapter : RecyclerView.Adapter<TrackViewHolder>() {
     var controlCallback: PlayerControlCallback? = null
 
     var items: MutableList<PlayableTrack> =  mutableListOf()
+//    set(value) {
+//        val diffUtil = TrackListDiffUtilCallback(field, value)
+//        val result = DiffUtil.calculateDiff(diffUtil)
+//        field = value
+//        result.dispatchUpdatesTo(this)
+//    }
 
-     fun updateItems(newItems: MutableList<PlayableTrack>) {
-//         val diffUtil = TrackListDiffUtil(items, newItems)
-//         val result = DiffUtil.calculateDiff(diffUtil)
-         items.clear()
-         items.addAll(newItems)
-         notifyDataSetChanged()
-       // result.dispatchUpdatesTo(this)
-     }
+    fun updateItems(newItems: MutableList<PlayableTrack>) {
+         val diffUtil = TrackListDiffUtilCallback(items, newItems)
+         val result = DiffUtil.calculateDiff(diffUtil)
+        items.clear()
+        items.addAll(newItems)
+        result.dispatchUpdatesTo(this)
+    }
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
@@ -38,12 +43,12 @@ class TrackListAdapter : RecyclerView.Adapter<TrackViewHolder>() {
         } else {
             payloads.forEach { payload ->
                 val bundle = payload as Bundle
-                if (bundle.containsKey(TrackListDiffUtil.PROGRESS_KEY)){
-                    val progress = bundle.getInt(TrackListDiffUtil.PROGRESS_KEY)
+                if (bundle.containsKey(TrackListDiffUtilCallback.PROGRESS_KEY)){
+                    val progress = bundle.getInt(TrackListDiffUtilCallback.PROGRESS_KEY)
                     holder.setProgress(progress)
                 }
-                if (bundle.containsKey(TrackListDiffUtil.STATE_KEY)){
-                    val state = bundle.getSerializable(TrackListDiffUtil.STATE_KEY) as PlayingState
+                if (bundle.containsKey(TrackListDiffUtilCallback.STATE_KEY)){
+                    val state = bundle.getSerializable(TrackListDiffUtilCallback.STATE_KEY) as PlayingState
                     holder.setState(state)
                 }
             }
