@@ -34,11 +34,11 @@ class TrackListFragment : Fragment(R.layout.fragment_song_list) {
         list.setDivider(R.drawable.track_list_item_divider)
         currentPlay.setUpBlurView(list)
 
-        viewModel.tracks.observe(viewLifecycleOwner, {
-            listAdapter.updateItems(it)
+        viewModel.tracksNew.observe(viewLifecycleOwner, {
+            listAdapter.items = it
         })
 
-        viewModel.currentTrack.observe(viewLifecycleOwner, {
+        viewModel.currentTrackNew.observe(viewLifecycleOwner, {
             currentPlay.bind(it)
 
         })

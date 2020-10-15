@@ -17,30 +17,35 @@ class TrackListViewModel(
 
      private val interactor = TrackInteractor.getInstance(application)
      private val player = PlayerProvider(this)
+     private val state = MutableLiveData<ListState>()
 
 
-     val currentTrack = MutableLiveData<PlayableTrack?>(null)
-     val tracks = MutableLiveData<MutableList<PlayableTrack>>(mutableListOf())
+     val tracksNew = Transformations.distinctUntilChanged(
+          Transformations.switchMap(state){
+               TracksLiveData(it)
+          }
+     )
+     val currentTrackNew = Transformations.distinctUntilChanged(
+          Transformations.switchMap(state){
+               CurrentTrackLiveData(it)
+          }
+     )
 
-
+     init {
+          state.value = ListState()
+     }
 
      fun loadList(resId: Int) = viewModelScope.launch(Dispatchers.IO) {
           val list = interactor.loadList(resId)
           list?.let {
-               tracks.postValue(it)
+               state.postValue(ListState(it))
           }
      }
 
 
      //коллбэк от плеера при начале воспроизведения
      override fun onPlayStarted() {
-          currentTrack.value?.let { track ->
-               val updatedTrack = track.copy(
-                    state = PlayingState.Playing
-               )
-               updateList(updatedTrack)
-               currentTrack.value = updatedTrack
-          }
+          state.value = state.value?.play()
      }
 
      //коллбэк от плеера при паузе воспроизведения
@@ -51,14 +56,7 @@ class TrackListViewModel(
 
      //коллбэк от плеера при окончании воспроизведения
      override fun onPlayStopped() {
-          currentTrack.value?.let { track ->
-               val updatedTrack = track.copy(
-                    state = PlayingState.OnStop,
-                    progress = 0
-               )
-               updateList(updatedTrack)
-               currentTrack.value = null
-          }
+          state.value?.stop()
      }
 
 
@@ -69,33 +67,12 @@ class TrackListViewModel(
 
      //коллбэк от плеера с прогрессом воспроизведения
      override fun onProgressUpdated(progress: Int) {
-          currentTrack.value?.let { track ->
-               val updatedTrack = track.copy(
-                    progress = progress
-               )
-               updateList(updatedTrack)
-               currentTrack.setValue(updatedTrack)
-          }
+          state.value = state.value?.updateProgress(progress)
      }
 
      //коллбэк от плеера с прогрессом буферизации
-
      override fun onBufferingProgressUpdated(progress: Int) {
 
-     }
-
-     private fun updateList(updatedTrack: PlayableTrack) {
-          tracks.value?.let {
-               val inList = it.find {track ->
-                    track.id == updatedTrack.id
-               }
-
-               if (inList != null){
-                    val indexOf = it.indexOf(inList)
-                    it[indexOf] = updatedTrack
-                    tracks.value = it
-               }
-          }
      }
 
 
@@ -115,22 +92,13 @@ class TrackListViewModel(
      }
 
      private fun handleCurrentTrack() {
-          val track = currentTrack.value
-          track?.let { tr ->
-               tracks.value?.let { list ->
-                    val inList = list.find {
-                         tr.id == it.id
-                    }
-                    val indexOF = list.indexOf(inList)
-                    when (tr.state){
-                         PlayingState.Playing -> pauseTrack(tr, indexOF, list)
-                         PlayingState.OnPause -> playTrack(tr, indexOF, list)
-                         else -> return
-                    }
-
-               }
+          if (state.value?.isSomethingPlaying() == true){
+               state.value = state.value?.pause()
+               player.pause()
+          } else if (state.value?.isSomethingOnPause() == true){
+               state.value = state.value?.play()
+               player.play()
           }
-
      }
 
      override fun itemClosed() {
@@ -139,137 +107,71 @@ class TrackListViewModel(
      }
 
 
+     private fun handleTrack(index: Int) {
+          val currentTrack = state.value?.findCurrentTrack()
+          val nextTrack = state.value?.getSelectedTrack(index)
 
-     private fun handleTrack(itemPosition: Int) {
-          val trackList = tracks.value
-          trackList?.let { list ->
-               val selectedTrack = list[itemPosition]
-               val currentTrack = list.find {
-                    it.state == PlayingState.Loading
-                            || it.state == PlayingState.Playing
-                            || it.state == PlayingState.OnPause
-               }
-               currentTrack?.let { ct ->
-                    if (ct.id == selectedTrack.id){
-                         when (ct.state){
-                              PlayingState.Playing -> {
-                                   pauseTrack(selectedTrack, itemPosition, list)
-                              }
-                              PlayingState.OnPause -> {
-                                   playTrack(selectedTrack, itemPosition, list)
-                              }
-                              else -> return
-                         }
-                    } else {
-                         switchTrack(selectedTrack, ct, itemPosition, list)
-                    }
-               } ?: startNewTrack(selectedTrack, itemPosition, list)
-
+          if (currentTrack == null && nextTrack == null){
+               return
           }
+
+          currentTrack?.let { ct ->
+               if (ct.id == nextTrack?.id){
+                    when (ct.state){
+                         PlayingState.Playing -> {
+                              pauseTrack()
+                         }
+                         PlayingState.OnPause -> {
+                             playTrack()
+                         }
+                         else -> return
+                    }
+               } else {
+                    switchTrack(true, nextTrack)
+               }
+          } ?: switchTrack(false, nextTrack)
+
      }
 
      private fun switchTrack(
-          selectedTrack: PlayableTrack,
-          currentTrack: PlayableTrack,
-          itemPosition: Int,
-          list: MutableList<PlayableTrack>
+          switch: Boolean,
+          nextTrack: PlayableTrack?,
      ) {
-          val currentTrackPosition = list.indexOf(currentTrack)
-          val copiedTrack = selectedTrack.copy(
-               state = PlayingState.Loading
-          )
-
-          list[currentTrackPosition] = currentTrack.copy(
-               state = PlayingState.OnStop,
-               progress = 0
-          )
-          list[itemPosition] = copiedTrack
-
-          this.currentTrack.value = copiedTrack
-          tracks.value = list
-          player.playSoundFromUrl(selectedTrack.previewPath)
-
+          if (switch){
+          state.value = state.value?.stop()
+          }
+          nextTrack?.let {
+               state.value = state.value?.start(it.id)
+               player.playSoundFromUrl(nextTrack.previewPath)
+          }
      }
 
-     private fun playTrack(
-          selectedTrack: PlayableTrack,
-          listPosition: Int,
-          list: MutableList<PlayableTrack>
-     ) {
-          selectedTrack.state = PlayingState.Playing
-          list[listPosition] = selectedTrack
-          currentTrack.value = selectedTrack
-          tracks.value = list
+     private fun playTrack() {
+          state.value = state.value?.play()
           player.play()
-          //   log("ON_PLAY")
      }
 
-     private fun pauseTrack(
-          selectedTrack: PlayableTrack,
-          listPosition: Int,
-          list: MutableList<PlayableTrack>
-     ) {
-          selectedTrack.state = PlayingState.OnPause
-          list[listPosition] = selectedTrack
-          currentTrack.value = selectedTrack
-          tracks.value = list
+     private fun pauseTrack() {
+          state.value = state.value?.pause()
           player.pause()
-          // log("ON_PAUSE")
-
-
      }
 
-     private fun startNewTrack(
-          selectedTrack: PlayableTrack,
-          listPosition: Int,
-          list: MutableList<PlayableTrack>
-     ) {
-          val copiedTrack = selectedTrack.copy(
-               state = PlayingState.Loading
-          )
-          list[listPosition] = copiedTrack
-          currentTrack.value = copiedTrack
-          tracks.value = list
-          player.playSoundFromUrl(selectedTrack.previewPath)
-
-     }
 
      fun onDestroy() {
           player.release()
      }
 
      fun onLifeCyclePause(){
-          val track = currentTrack.value
-          track?.let { tr ->
-               tracks.value?.let { list ->
-                    val inList = list.find {
-                         tr.id == it.id
-                    }
-                    val indexOF = list.indexOf(inList)
-                    when (tr.state){
-                         PlayingState.Playing -> pauseTrack(tr, indexOF, list)
-                         else -> return
-                    }
-
-               }
+          if (state.value?.isSomethingPlaying() == true){
+               state.value = state.value?.pause()
+               player.pause()
           }
      }
 
      fun onLifeCycleResume(){
-          val track = currentTrack.value
-          track?.let { tr ->
-               tracks.value?.let { list ->
-                    val inList = list.find {
-                         tr.id == it.id
-                    }
-                    val indexOF = list.indexOf(inList)
-                    when (tr.state){
-                         PlayingState.OnPause -> playTrack(tr, indexOF, list)
-                         else -> return
-                    }
-
-               }
+          if (state.value?.isSomethingOnPause() == true){
+               state.value = state.value?.play()
+               player.play()
           }
      }
-
 }
