@@ -56,7 +56,7 @@ class TrackListViewModel(
 
      //коллбэк от плеера при окончании воспроизведения
      override fun onPlayStopped() {
-          state.value?.stop()
+         state.value = state.value?.stop()
      }
 
 
